@@ -34,7 +34,7 @@ img,svg{display:block;} button{font-family:inherit;cursor:pointer;} a{color:inhe
 .btn-secondary{background:#fff;color:var(--navy);border:1.5px solid var(--gray-line);box-shadow:var(--shadow-soft);}
 .btn-secondary:hover{border-color:var(--blue);color:var(--blue-dark);}
 .btn-block{width:100%;} .btn-sm{padding:9px 14px;font-size:13.5px;border-radius:11px;}
-.hero{position:relative;min-height:78vh;display:flex;align-items:center;justify-content:center;padding:70px 24px 50px;overflow:hidden;background:radial-gradient(1200px 600px at 15% -10%,#E7EEFF 0%,transparent 60%),radial-gradient(900px 500px at 100% 10%,#EAF7F0 0%,transparent 55%),linear-gradient(180deg,#FBFCFE 0%,#F3F5F9 100%);}
+.hero{position:relative;flex:1;display:flex;align-items:center;justify-content:center;padding:70px 24px 50px;overflow:hidden;background:transparent;}
 .hero-inner{max-width:900px;text-align:center;position:relative;z-index:3;}
 .hero-badge{display:inline-flex;align-items:center;gap:8px;padding:7px 14px;border-radius:999px;background:#fff;border:1px solid var(--gray-line);box-shadow:var(--shadow-soft);font-size:12.5px;font-weight:600;color:var(--slate);margin-bottom:26px;}
 .dot-live{width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 0 3px var(--green-tint);animation:pulseDot 1.8s infinite;}
@@ -153,8 +153,11 @@ img,svg{display:block;} button{font-family:inherit;cursor:pointer;} a{color:inhe
 </nav>
 
 <!-- LANDING -->
-<section class="page active" id="page-landing">
-<div class="hero">
+<section class="page active" id="page-landing" style="height: 400vh; position: relative;">
+<div style="position: sticky; top: 0; left: 0; width: 100%; height: 100vh; overflow: hidden; display: flex; flex-direction: column;">
+<canvas id="hero-canvas" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; z-index: 0;"></canvas>
+<div style="position: absolute; inset: 0; background: linear-gradient(180deg, rgba(255,255,255,0.7) 0%, rgba(243, 245, 249, 0.85) 100%); z-index: 1;"></div>
+<div class="hero" style="z-index: 2;">
 <div class="hero-inner">
 <div class="hero-badge"><span class="dot-live"></span> Live at Main Building (Ground & First Floor)</div>
 <h1>Navigate the <span>Campus</span> with Precision</h1>
@@ -165,7 +168,8 @@ img,svg{display:block;} button{font-family:inherit;cursor:pointer;} a{color:inhe
 </div>
 </div>
 </div>
-<div class="footer-note">CampusNav — Built dynamically from specific multi-floor blueprints.</div>
+<div class="footer-note" style="position: relative; z-index: 2; padding-bottom: 20px;">CampusNav — Built dynamically from specific multi-floor blueprints.</div>
+</div>
 </section>
 
 <!-- DASHBOARD -->
@@ -1505,6 +1509,81 @@ let html = `<li class="step done"><div class="step-ic">${svgCheck}</div><div><p>
 function generateSteps(points, isFinalSegment){ let segHtml = ""; if(points && points.length > 2){ for(let i = 1; i < points.length - 1; i++){ let p1 = points[i]; let p2 = points[i+1]; let dist = Math.max(2, Math.round(Math.hypot(p2.x - p1.x, p2.y - p1.y) / PX_PER_METER)); if(dist < 2 && i !== 1) continue; let isHoriz = p1.y === p2.y; let isVert = p1.x === p2.x; let action = "Walk straight"; let icon = svgStraight; if(i === 1){ if(p2.x < p1.x){ action = "Turn left into corridor"; icon = svgLeft; } else if(p2.x > p1.x){ action = "Turn right into corridor"; icon = svgRight; } } else { if(isHoriz){ icon = p2.x > p1.x ? svgRight : svgLeft; action = `Turn ${p2.x > p1.x ? 'right' : 'left'} along passage`; } else if(isVert){ icon = svgStraight; action = "Head straight towards target"; } } segHtml += `<li class="step"><div class="step-ic">${icon}</div><div><p>${action}</p><span>~${dist} m</span></div></li>`; } } if(isFinalSegment) segHtml += `<li class="step"><div class="step-ic">${svgPin}</div><div><p>Destination ahead — ${r.name}</p><span>Arriving</span></div></li>`; return segHtml; }
 if(!route.multi){ if(currentStartId !== destId) html += generateSteps(route.path0, true); } else { html += generateSteps(route.path0, false); const flStr = route.floor1 === 0 ? "Ground Floor" : (route.floor1 === 1 ? "First Floor" : "Second Floor"); html += `<li class="step active"><div class="step-ic" style="background:var(--blue); border-color:var(--blue); color:#fff;">${svgStairs}</div><div><p>Take ${route.transit}</p><span>Switch to ${flStr}</span></div></li>`; html += generateSteps(route.path1, true); } if(stepsList) stepsList.innerHTML = html;
 }
+</script>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    const canvas = document.getElementById("hero-canvas");
+    if (!canvas) return;
+    const context = canvas.getContext("2d");
+    
+    const frameCount = 240;
+    const currentFrame = index => (
+      `./frames_30fps_JPG/frame_${index.toString().padStart(6, '0')}.jpg`
+    );
+
+    const images = [];
+    
+    function drawImage(index) {
+        if (!images[index] || !images[index].complete) return;
+        
+        if (canvas.width !== window.innerWidth || canvas.height !== window.innerHeight) {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        
+        const img = images[index];
+        const hRatio = canvas.width / img.width;
+        const vRatio = canvas.height / img.height;
+        const ratio = Math.max(hRatio, vRatio);
+        const centerShift_x = (canvas.width - img.width * ratio) / 2;
+        const centerShift_y = (canvas.height - img.height * ratio) / 2;
+        
+        context.clearRect(0, 0, canvas.width, canvas.height);
+        context.drawImage(img, 0, 0, img.width, img.height,
+            centerShift_x, centerShift_y, img.width * ratio, img.height * ratio);
+    }
+    
+    for (let i = 0; i < frameCount; i++) {
+        const img = new Image();
+        img.src = currentFrame(i);
+        images.push(img);
+        
+        if (i === 0) {
+            img.onload = function() { drawImage(0); };
+        }
+    }
+
+    window.addEventListener("scroll", () => {
+        const pageLanding = document.getElementById("page-landing");
+        if (!pageLanding || !pageLanding.classList.contains("active")) return;
+        
+        const rect = pageLanding.getBoundingClientRect();
+        const maxScroll = rect.height - window.innerHeight;
+        let scrollFraction = -rect.top / maxScroll;
+        
+        scrollFraction = Math.max(0, Math.min(1, scrollFraction));
+        
+        const frameIndex = Math.min(
+            frameCount - 1,
+            Math.floor(scrollFraction * frameCount)
+        );
+        
+        requestAnimationFrame(() => drawImage(frameIndex));
+    });
+    
+    window.addEventListener("resize", () => {
+        const pageLanding = document.getElementById("page-landing");
+        if (!pageLanding || !pageLanding.classList.contains("active")) return;
+        
+        const rect = pageLanding.getBoundingClientRect();
+        const maxScroll = rect.height - window.innerHeight;
+        let scrollFraction = -rect.top / maxScroll;
+        scrollFraction = Math.max(0, Math.min(1, scrollFraction));
+        const frameIndex = Math.min(frameCount - 1, Math.floor(scrollFraction * frameCount));
+        
+        requestAnimationFrame(() => drawImage(frameIndex));
+    });
+});
 </script>
 </body>
 </html>
