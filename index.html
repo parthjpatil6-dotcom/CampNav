@@ -4,15 +4,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>CampusNav — Multi-Floor Routing</title>
-<script>
-  if (window.location.hostname.includes("github.io")) {
-    // Grab any extra data attached to the QR code link (like ?loc=cafeteria or #cafeteria)
-    const extraData = window.location.search + window.location.hash;
-    
-    // Bounce the user to Vercel AND attach the extra data to the new link
-    window.location.replace("https://camp-nav-dusky.vercel.app/?start=cafeteria" + extraData);
-  }
-</script>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <!-- Added jsQR library to decode the camera image -->
 <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
