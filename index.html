@@ -1340,8 +1340,8 @@ if(f1 === f2){
         const sId1 = getStairIdForFloor(f1);
         const sId2 = getStairIdForFloor(f2);
         
-        const r_s0 = ROOMS[sId1]; 
-        const r_s1 = ROOMS[sId2]; 
+        const r_s0 = ROOMS[sId1] || DOORS[sId1]; 
+        const r_s1 = ROOMS[sId2] || DOORS[sId2]; 
         if(!r_s0 || !r_s1) return; 
         
         const s1 = DOORS[sId1] || {x: r_s0.x, y: r_s0.y}; 
