@@ -1309,7 +1309,7 @@ let costMain = Math.abs(p1.y - SPINE_HORIZ_BOT) + Math.abs(p2.y - SPINE_HORIZ_BO
 if(p1.y < 460 && p2.y < 460) crossingSpineY = 293; 
 if(vx1 >= SPINE_VERT_EAST && vx2 >= SPINE_VERT_EAST && p1.y > 350 && p2.y > 350){ crossingSpineY = SPINE_HORIZ_EAST_BOT; }
 path.push(...midNodes1);
-let canBypassVx = (vx1 === vx2) && (Math.abs(p1.y - crossingSpineY) <= 200) && (Math.abs(p2.y - crossingSpineY) <= 200);
+let canBypassVx = (vx1 === vx2) && (Math.abs(p1.y - crossingSpineY) <= 200) && (Math.abs(p2.y - crossingSpineY) <= 200) && (Math.abs(p1.y - p2.y) <= 25);
 if(canBypassVx) {
     let cy = crossingSpineY;
     if (Math.abs(p1.y - 271) < 5 || Math.abs(p1.y - 496) < 5 || Math.abs(p1.y - 522.5) < 5 || Math.abs(p1.y - 293) < 5) cy = p1.y;
