@@ -1295,8 +1295,10 @@ renderFacilities();
 const PX_PER_METER = 10; 
 function getIntraFloorPath(r1, d1, r2, d2) {
 let path = [{x: r1.x + r1.w/2, y: r1.y + r1.h/2}, d1];
-let getSpineX = (p) => { if (p.x === 612.5 && p.y === 497) return SPINE_VERT_WEST; if (p.x === 882 && p.y === 497) return SPINE_VERT_EAST; if (p.x < 600) return SPINE_VERT_WEST; if (p.x >= 600 && p.x < 1000) return SPINE_VERT_CENTER; if (p.x >= 1400 && p.y > 500) return SPINE_VERT_FAR_EAST; return SPINE_VERT_EAST; };
-let vx1 = getSpineX(d1); let vx2 = getSpineX(d2); let p1 = d1; let p2 = d2; let midNodes1 = []; let midNodes2 = [];
+let getSpineX = (p) => { if (p.x < 756) return SPINE_VERT_WEST; if (p.x >= 1400 && p.y > 500) return SPINE_VERT_FAR_EAST; return SPINE_VERT_EAST; };
+let vx1 = getSpineX(d1); let vx2 = getSpineX(d2);
+if (vx1 !== vx2 && vx1 !== SPINE_VERT_FAR_EAST && vx2 !== SPINE_VERT_FAR_EAST) { let c1 = Math.abs(d1.x - vx1) + Math.abs(d2.x - vx1); let c2 = Math.abs(d1.x - vx2) + Math.abs(d2.x - vx2); if (c1 <= c2) vx2 = vx1; else vx1 = vx2; }
+let p1 = d1; let p2 = d2; let midNodes1 = []; let midNodes2 = [];
 
 if(p1.y === 497) { midNodes1.push({x: vx1, y: 497}); p1 = {x: vx1, y: 497}; }
 if(p2.y === 497) { midNodes2.unshift({x: vx2, y: 497}); p2 = {x: vx2, y: 497}; }
