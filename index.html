@@ -1295,9 +1295,20 @@ renderFacilities();
 const PX_PER_METER = 10; 
 function getIntraFloorPath(r1, d1, r2, d2) {
 let path = [{x: r1.x + r1.w/2, y: r1.y + r1.h/2}, d1];
-let getSpineX = (p) => { if (p.x < 756) return SPINE_VERT_WEST; if (p.x >= 1400 && p.y > 500) return SPINE_VERT_FAR_EAST; return SPINE_VERT_EAST; };
+let getSpineX = (p) => { if (p.x === 612.5 && p.y === 497) return SPINE_VERT_WEST; if (p.x === 882 && p.y === 497) return SPINE_VERT_EAST; if (p.x < 600) return SPINE_VERT_WEST; if (p.x >= 600 && p.x < 1000) return SPINE_VERT_CENTER; if (p.x >= 1400 && p.y > 500) return SPINE_VERT_FAR_EAST; return SPINE_VERT_EAST; };
 let vx1 = getSpineX(d1); let vx2 = getSpineX(d2);
-if (vx1 !== vx2 && vx1 !== SPINE_VERT_FAR_EAST && vx2 !== SPINE_VERT_FAR_EAST) { let c1 = Math.abs(d1.x - vx1) + Math.abs(d2.x - vx1); let c2 = Math.abs(d1.x - vx2) + Math.abs(d2.x - vx2); if (c1 <= c2) vx2 = vx1; else vx1 = vx2; }
+let crossesVoid = (r1.floor === 2) && (Math.min(vx1, vx2) < 756 && Math.max(vx1, vx2) > 756);
+if (vx1 !== vx2 && vx1 !== SPINE_VERT_FAR_EAST && vx2 !== SPINE_VERT_FAR_EAST) {
+    if (crossesVoid && d1.y > 350 && d2.y > 350) {
+        // do not force vx1=vx2, route around void
+    } else if (crossesVoid && (d1.y > 350 || d2.y > 350)) {
+        if (d1.y > 350) vx2 = vx1; else vx1 = vx2;
+    } else {
+        let c1 = Math.abs(d1.x - vx1) + Math.abs(d2.x - vx1); 
+        let c2 = Math.abs(d1.x - vx2) + Math.abs(d2.x - vx2); 
+        if (c1 <= c2) vx2 = vx1; else vx1 = vx2; 
+    }
+}
 let p1 = d1; let p2 = d2; let midNodes1 = []; let midNodes2 = [];
 
 if(p1.y === 497) { midNodes1.push({x: vx1, y: 497}); p1 = {x: vx1, y: 497}; }
@@ -1308,6 +1319,7 @@ if(vx2 === SPINE_VERT_FAR_EAST && vx1 !== SPINE_VERT_FAR_EAST){ midNodes2.unshif
 let costMain = Math.abs(p1.y - SPINE_HORIZ_BOT) + Math.abs(p2.y - SPINE_HORIZ_BOT); let costSec = Math.abs(p1.y - SPINE_HORIZ_TOP) + Math.abs(p2.y - SPINE_HORIZ_TOP); let crossingSpineY = (costSec < costMain) ? SPINE_HORIZ_TOP : SPINE_HORIZ_BOT;
 if(p1.y < 460 && p2.y < 460) crossingSpineY = 293; 
 if(vx1 >= SPINE_VERT_EAST && vx2 >= SPINE_VERT_EAST && p1.y > 350 && p2.y > 350){ crossingSpineY = SPINE_HORIZ_EAST_BOT; }
+if(crossesVoid) crossingSpineY = 271;
 path.push(...midNodes1);
 let canBypassVx = (vx1 === vx2) && (Math.abs(p1.y - crossingSpineY) <= 200) && (Math.abs(p2.y - crossingSpineY) <= 200) && (Math.abs(p1.y - p2.y) <= 25);
 if(canBypassVx) {
